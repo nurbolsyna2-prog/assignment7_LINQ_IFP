@@ -1,0 +1,25 @@
+<dl class="summary" aria-label="Order summary">
+    <dt>Subtotal</dt>
+    <dd>@Breakdown.Subtotal.Money(Currency)</dd>
+    @if (Breakdown.BulkDiscount > 0)
+    {
+        <dt>Bulk discount</dt>
+        <dd>-@Breakdown.BulkDiscount.Money(Currency)</dd>
+    }
+    @if (Breakdown.PromoDiscount > 0)
+    {
+        <dt>Promo code</dt>
+        <dd>-@Breakdown.PromoDiscount.Money(Currency)</dd>
+    }
+    <dt>Tax</dt>
+    <dd>@Breakdown.Tax.Money(Currency)</dd>
+    <dt>Shipping</dt>
+    <dd>@(Breakdown.Shipping == 0 ? "Free" : Breakdown.Shipping.Money(Currency))</dd>
+    <dt class="total">Total</dt>
+    <dd class="total">@Breakdown.Total.Money(Currency)</dd>
+</dl>
+
+@code {
+    [Parameter, EditorRequired] public PriceBreakdown Breakdown { get; set; } = default!;
+    [Parameter] public string Currency { get; set; } = "$";
+}

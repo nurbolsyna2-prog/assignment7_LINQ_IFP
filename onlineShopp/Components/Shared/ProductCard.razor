@@ -1,0 +1,13 @@
+@inject PricingRules Rules
+
+<article class="card">
+    <h3>@Product.Name</h3>
+    <p class="muted">@Product.Category</p>
+    <p class="price">@Product.Price.Money(Rules.Currency)</p>
+    <button class="primary" @onclick="() => OnAdd.InvokeAsync(Product)">Add to cart</button>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public Product Product { get; set; } = default!;
+    [Parameter] public EventCallback<Product> OnAdd { get; set; }
+}

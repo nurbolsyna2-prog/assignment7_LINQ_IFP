@@ -1,0 +1,27 @@
+@page "/"
+@inject ProductCatalog Catalog
+@inject CartState Cart
+
+<PageTitle>Catalog</PageTitle>
+<h1>Catalog</h1>
+
+<input type="search" class="search" placeholder="Search by name or category" aria-label="Search products" @bind="Search"
+       @bind:event="oninput" />
+
+<div class="grid">
+    @foreach (var product in Catalog.Search(Search))
+    {
+        <ProductCard Product="product" OnAdd="Add" />
+    }
+</div>
+
+@if (!Catalog.Search(Search).Any())
+{
+    <p>No products match "@Search".</p>
+}
+
+@code {
+    private string Search { get; set; } = "";
+
+    private void Add(Product product) => Cart.Add(product);
+}

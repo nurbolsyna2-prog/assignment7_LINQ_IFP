@@ -1,0 +1,21 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject CartState Cart
+
+<header class="top">
+    <a href="/" class="brand">🛒 Shop Calc</a>
+    <nav aria-label="Main">
+        <NavLink href="" Match="NavLinkMatch.All">Catalog</NavLink>
+        <NavLink href="cart">Cart <span class="badge">@Cart.TotalQuantity</span></NavLink>
+    </nav>
+</header>
+
+<main>@Body</main>
+
+@code {
+    protected override void OnInitialized() => Cart.OnChange += OnCartChanged;
+
+    private void OnCartChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Cart.OnChange -= OnCartChanged;
+}

@@ -1,0 +1,102 @@
+@page "/cart"
+@inject CartState Cart
+@inject PricingRules Rules
+
+<PageTitle>Cart</PageTitle>
+<h1>Your cart</h1>
+
+@if (ordered)
+{
+    <p class="ok" role="status">Order placed. Thank you!</p>
+}
+else if (!Cart.Items.Any())
+{
+    <p>Your cart is empty. <a href="/">Browse the catalog</a>.</p>
+}
+
+@if (Cart.Items.Any())
+{
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Line total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Cart.Items)
+                {
+                    <tr>
+                        <td>@item.Product.Name</td>
+                        <td>@item.Product.Price.Money(Rules.Currency)</td>
+                        <td>
+                            <input type="number" min="1" max="@CartState.MaxQuantity" value="@item.Quantity"
+                                   aria-label="Quantity for @item.Product.Name"
+                                   @onchange="e => ChangeQuantity(item.Product.Id, e)" />
+                        </td>
+                        <td>@item.LineTotal.Money(Rules.Currency)</td>
+                        <td><button class="link" @onclick="() => Cart.Remove(item.Product.Id)">Remove</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (error is not null)
+    {
+        <p class="error" role="alert">@error</p>
+    }
+
+    <section class="promo">
+        <label for="promo">Promo code</label>
+        <input id="promo" @bind="promoCode" placeholder="e.g. SAVE10" />
+        <button @onclick="ApplyPromo">Apply</button>
+        @if (Cart.AppliedPromo is not null)
+        {
+            <span class="ok">@Cart.AppliedPromo.Code applied</span>
+            <button class="link" @onclick="Cart.RemovePromo">Remove</button>
+        }
+        @if (promoError is not null)
+        {
+            <p class="error" role="alert">@promoError</p>
+        }
+    </section>
+
+    <PriceSummary Breakdown="Cart.Breakdown" Currency="@Rules.Currency" />
+
+    <button class="primary" @onclick="PlaceOrder">Place order</button>
+}
+
+@code {
+    private string promoCode = "";
+    private string? error;
+    private string? promoError;
+    private bool ordered;
+
+    private void ChangeQuantity(int productId, ChangeEventArgs e)
+    {
+        error = null;
+        if (!int.TryParse(e.Value?.ToString(), out var quantity))
+        {
+            error = "Enter a whole number.";
+            return;
+        }
+        error = Cart.SetQuantity(productId, quantity).Error;
+    }
+
+    private void ApplyPromo()
+    {
+        promoError = Cart.ApplyPromo(promoCode).Error;
+        if (promoError is null) promoCode = "";
+    }
+
+    private void PlaceOrder()
+    {
+        Cart.Clear();
+        ordered = true;
+    }
+}
